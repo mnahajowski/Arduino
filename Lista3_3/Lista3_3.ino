@@ -24,7 +24,52 @@ void setup() {
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
+ 
+  printng_new();
+  scrolling();
+  button_direction();
+  waiting(); 
+}
+
+void scrolling() {
+  if(whole_text[current].length() > LCD_SIZE) {
+    for(int j = 0; j < (whole_text[current].length() - LCD_SIZE); j++) {
+      lcd.scrollDisplayRight();
+    }
+    for(int j = 0; j < (whole_text[current].length() - LCD_SIZE); j++) {
+      lcd.scrollDisplayLeft();
+    }
+    delay(50);
+  }
+}
+
+void button_direction() {
+  
+  bool currentBtnState = digitalRead(BUTTON_PIN); // obecny stan pierwszego buttona
+  bool currentBtnState2 = digitalRead(BUTTON_PIN2); // obecny stan drugiego buttona
+  
+  if(currentBtnState != lastBtnState && currentBtnState == LOW) { //jesli wcisniety pierwszy idz w lewo
+    delay(20);  // upewnienie sie
+    if(currentBtnState != lastBtnState && currentBtnState == LOW) {
+      current--;
+      if(current < MINIMUM) {
+        current = ARRAY_SIZE;
+      }
+      lcd.println(whole_text[current]);
+    }
+  } else if (currentBtnState2 != lastBtnState2 && currentBtnState2 == LOW) { // jesli wcisniety drugi idz w prawo
+    delay(20);  // upewnienie sie
+    if(currentBtnState2 != lastBtnState2 && currentBtnState2 == LOW) {
+      current++;
+      if(current >= ARRAY_SIZE) {
+        current = MINIMUM;
+      }
+      lcd.println(whole_text[current]);
+    }
+  }
+}
+
+void printing_new() {
   if(has_came == true) {
     lcd.setCursor(0,0);
     lcd.println(whole_text[i-1]);
@@ -33,41 +78,11 @@ void loop() {
     if(i >= ARRAY_SIZE) {
       i = MINIMUM;
     }
-  }
+    has_came = false;
+  } 
+}
 
-  if(whole_text[current].length() > LCD_SIZE) {
-    for(int j = 0; j < (whole_text[current].length() - LCD_SIZE); j++) {
-      lcd.scrollDisplayRight();
-      delay(150);
-    }
-    for(int j = 0; j < (whole_text[current].length() - LCD_SIZE); j++) {
-      lcd.scrollDisplayLeft();
-      delay(150);
-    }
-  }
-  
-  bool currentBtnState = digitalRead(BUTTON_PIN); // obecny stan pierwszego buttona
-  bool currentBtnState2 = digitalRead(BUTTON_PIN2); // obecny stan drugiego buttona
-  if(currentBtnState != lastBtnState) { //jesli wcisniety pierwszy idz w lewo
-    delay(50);  // upewnienie sie
-    if(currentBtnState != lastBtnState) {
-      current--;
-      if(current < MINIMUM) {
-        current = ARRAY_SIZE;
-      }
-      lcd.println(whole_text[current]);
-    }
-  } else if (currentBtnState2 != lastBtnState2) { // jesli wcisniety drugi idz w prawo
-    delay(50);  // upewnienie sie
-    if(currentBtnState2 != lastBtnState2) {
-      current++;
-      if(current >= ARRAY_SIZE) {
-        current = MINIMUM;
-      }
-      lcd.println(whole_text[current]);
-    }
-  }
-
+void waiting() {
   if(Serial.available() > 0) {
     wiadomosc = Serial.readStringUntil('\n');
     whole_text[i] = wiadomosc;
